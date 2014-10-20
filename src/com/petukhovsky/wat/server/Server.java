@@ -35,7 +35,6 @@ public class Server {
     private static void init() {
         new Gui();
         Auth.init();
-        WatChat.init();
         WatOlympiad.init();
     }
 

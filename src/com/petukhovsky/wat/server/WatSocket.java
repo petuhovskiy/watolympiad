@@ -3,33 +3,15 @@ package com.petukhovsky.wat.server;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.HashMap;
 
 /**
  * Created by Arthur on 31.08.2014.
  * <p/>
- * Вот это мясо. Тут тоже всё дописано, осталось только модулей прифигачить.
  */
-   /*
-    * Описание протокола:
-    * Первое сообщение:
-    * 0 - Авторизация
-    * 1 - Регистрация
-    * 2 - watRemote auth
-    * Дальше идут логин и пароль. В случае успешного соединения сервер отвечает 1.
-    *
-    * Окно выбора:
-    * 0 - Перейти в watConsole.
-    * 1 - watChat
-    *
-    *
-    * Единые команды в модулях:
-    * 0 - Выход в окно выбора
-    * 2 - chatMessage
-    */
 public class WatSocket implements Runnable {
-    private static HashMap<Integer, WatSocket> connections = new HashMap<Integer, WatSocket>();
 
     private Socket socket = null;
     private DataOutputStream dos = null;
@@ -37,7 +19,6 @@ public class WatSocket implements Runnable {
     private Account account = null;
     private boolean interrupted = false;
     private boolean initialized = false;
-    private int mode = 0;
 
     WatSocket(Socket socket) {
         this.socket = socket;
@@ -71,11 +52,8 @@ public class WatSocket implements Runnable {
             case 1:
                 account = Auth.register(login, pass);
                 break;
-            case 2:
-                account = Auth.authWithReg(login, pass);
-                this.mode = 1;
-                break;
             default:
+                Log.d("Look just like incorrect request. IP: " + getIp());
                 destroy();
                 return;
         }
@@ -87,13 +65,17 @@ public class WatSocket implements Runnable {
         }
         writeByte(1);
         if (interrupted) return;
-        addConnection();
         initialized = true;
+        WatOlympiad.firstMsg(account, this);
         while (!interrupted) {
             int b = readByte();
             if (interrupted) return;
             msgReceived(b);
         }
+    }
+
+    private String getIp() {
+        return ((InetSocketAddress) socket.getRemoteSocketAddress()).getHostString();
     }
 
     public String read() {
@@ -232,82 +214,15 @@ public class WatSocket implements Runnable {
     }
 
     private void msgReceived(int b) {
-        if (this.mode == 1) {
-            write("Access denied");
-            return;
-        }
-        if (this.mode == 0) {
-            switch (b) {
-                case 0:
-                    if (this.account.getSuperuser() < 1) {
-                        writeByte(0);
-                        return;
-                    }
-                    this.mode = 2;
-                    writeByte(1);
-                    WatConsole.firstMsg(account, this);
-                    return;
-                case 1:
-                    this.mode = 3;
-                    WatChat.firstMsg(account, this);
-                    return;
-                case 2:
-                    this.mode = 4;
-                    WatOlympiad.firstMsg(account, this);
-                    return;
-                default:
-                    writeByte(0);
-                    return;
-            }
-        }
-        if (b == 0) {
-            switch (this.mode) {
-                case 3:
-                    WatChat.deleteUser(this);
-                    break;
-                case 4:
-                    WatOlympiad.setState(this, -1);
-                    break;
-            }
-            this.mode = 0;
-            writeByte(1);
-            return;
-        }
-        switch (this.mode) {
-            case 2:
-                WatConsole.msgReceived(b, account, this);
-                return;
-            case 3:
-                WatChat.msgReceived(b, account, this);
-                return;
-            case 4:
-                WatOlympiad.msgReceived(b, account, this);
-                return;
-            default:
-                writeByte(0);
-        }
+        WatOlympiad.msgReceived(b, account, this);
     }
 
     private void addConnection() {
-        connections.put(this.account.getId(), this);
-        if (this.mode == 1) {
-            WatConsole.addUser(account.getLogin().toLowerCase(), this);
-        }
+        //TODO: delete this
     }
 
     private void deleteConnection() {
-        connections.remove(account.getId());
-        switch (this.mode) {
-            case 1:
-                WatConsole.deleteUser(account.getLogin().toLowerCase());
-                break;
-            case 3:
-                WatChat.deleteUser(this);
-                break;
-            case 4:
-                WatOlympiad.setState(this, -1);
-                break;
-        }
+        WatOlympiad.setState(this, -1);
     }
 
     public boolean isDead() {

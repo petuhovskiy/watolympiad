@@ -51,7 +51,7 @@ public class WatOlympiad implements Runnable{
             }
             return;
         }
-        if (b == 1) {
+        if (b == 0) {
             ws.writeByte(1);
             states.put(ws, 0);
             ws.writeInt(olympiads.size());
