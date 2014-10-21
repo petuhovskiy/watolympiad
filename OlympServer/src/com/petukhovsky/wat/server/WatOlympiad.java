@@ -21,6 +21,7 @@ public class WatOlympiad implements Runnable{
     private static boolean checkNow = true;
 
     public static void firstMsg(Account account, WatSocket ws) {
+        System.out.println("First msg");
         ws.writeByte(1);
         setState(ws, 0);
         ws.writeInt(olympiads.size());

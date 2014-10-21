@@ -1,7 +1,6 @@
 package com.petukhovsky.wat.gui;
 
 import javax.swing.*;
-import javax.swing.tree.ExpandVetoException;
 import java.io.*;
 import java.net.Socket;
 
@@ -10,19 +9,19 @@ import java.net.Socket;
  */
 public class WatNetwork implements Runnable {
     private final static String SERVER_IP = "localhost";
+    private final static int PORT = 4898;
 
     private static Socket socket = null;
     private static DataInputStream dis = null;
     private static DataOutputStream dos = null;
     private static int connection = -1;
-    private static int connection2 = -1;
     private static File sourceFile;
 
     @Override
     public void run() {
         while (true) {
             try {
-                socket = new Socket(SERVER_IP, 4897);
+                socket = new Socket(SERVER_IP, PORT);
                 dis = new DataInputStream(socket.getInputStream());
                 dos = new DataOutputStream(socket.getOutputStream());
             } catch (IOException e) {
@@ -58,7 +57,6 @@ public class WatNetwork implements Runnable {
         socket = null;
         if (connection == 1 || connection == 2) WatAuth.getWatAuth().unlock();
         connection = -1;
-        connection2 = -1;
         WatGUI.showAuthPanel();
     }
 
@@ -160,7 +158,14 @@ public class WatNetwork implements Runnable {
         if (connection == 1 || connection == 2) {
             if (b == 1) {
                 connection = 3;
-                openOlympiad();
+                readByte();
+                int count = readInt();
+                String[] arr = new String[count];
+                for (int i = 0; i < count; i++) {
+                    arr[i] = read();
+                }
+                WatOlympiad.getWatOlympiad().showChoosePanel(arr);
+                WatGUI.showOlympiadPanel();
                 WatAuth.getWatAuth().unlock();
             } else {
                 if (connection == 1) {
@@ -173,48 +178,7 @@ public class WatNetwork implements Runnable {
             return;
         }
         switch (connection) {
-            case 4:
-                if (b == 0) {
-                    connection = connection2;
-                } else {
-                    connection = 3;
-                    WatGUI.showMenuPanel();
-                }
-                if (connection2 == 6) WatConsole.getWatConsole().unlock();
-                connection2 = -1;
-                return;
-            case 5:
-                if (b == 0) {
-                    JOptionPane.showMessageDialog(WatGUI.getGui(), "У вас недостаточно прав", "WatGUI", JOptionPane.WARNING_MESSAGE);
-                    WatMenu.getWatMenu().unlock();
-                } else {
-                    connection = 6;
-                    WatGUI.showConsolePanel();
-                }
-                return;
-            case 6:
-                if (b == 1) {
-                    String s = read();
-                    WatConsole.getWatConsole().addMessage(s);
-                    WatConsole.getWatConsole().unlock();
-                }
-                return;
-            case 9:
-                if (b == 0) {
-                    JOptionPane.showMessageDialog(WatGUI.getGui(), "У вас недостаточно прав", "WatGUI", JOptionPane.WARNING_MESSAGE);
-                    WatMenu.getWatMenu().unlock();
-                } else {
-                    connection = 10;
-                    int count = readInt();
-                    String[] arr = new String[count];
-                    for (int i = 0; i < count; i++) {
-                        arr[i] = read();
-                    }
-                    WatOlympiad.getWatOlympiad().showChoosePanel(arr);
-                    WatGUI.showOlympiadPanel();
-                }
-                return;
-            case 10:
+            case 3:
                 if (b == 0) {
                     JOptionPane.showMessageDialog(WatGUI.getGui(), "Вы не зарегистрированы на соревнование", "WatGUI", JOptionPane.WARNING_MESSAGE);
                     WatOlympiad.getWatOlympiad().unlock();
@@ -236,10 +200,10 @@ public class WatNetwork implements Runnable {
                         WatOlympiad.getWatOlympiad().addState(id, time, task, status, language, msg, source);
                     }
                     WatOlympiad.getWatOlympiad().showOlympPanel(arr, duration);
-                    connection = 11;
+                    connection = 4;
                 }
                 return;
-            case 11:
+            case 4:
                 if (b == 2) {
                     long timePassed = readLong();
                     WatOlympiad.getWatOlympiad().startOlymp(timePassed);
@@ -261,19 +225,9 @@ public class WatNetwork implements Runnable {
                     WatOlympiad.getWatOlympiad().changeState(id, status, msg);
                 }
                 return;
-            case 12:
-                int count = readInt();
-                String[] arr = new String[count];
-                for (int i = 0; i < count; i++) {
-                    arr[i] = read();
-                }
-                WatOlympiad.getWatOlympiad().showChoosePanel(arr);
-                WatGUI.showOlympiadPanel();
-                connection = 10;
-                return;
-            case 13:
+            case 5:
                 if (b == 0) {
-                    connection = 11;
+                    connection = 4;
                     WatOlympiad.getWatOlympiad().unlock();
                     return;
                 }
@@ -286,7 +240,7 @@ public class WatNetwork implements Runnable {
                         writeByte(fis.read());
                         k++;
                     }
-                    connection = 11;
+                    connection = 4;
                 } catch (Exception e) {
                     e.printStackTrace();
                     destroy();
@@ -326,43 +280,23 @@ public class WatNetwork implements Runnable {
         write(pass);
     }
 
-    public static void goToMenu() {
-        connection2 = connection;
-        connection = 4;
-        writeByte(0);
-    }
-
-    public static void openConsole() {
-        connection = 5;
-        writeByte(0);
-    }
-
-    public static void openOlympiad() {
-        connection = 9;
-        writeByte(2);
-    }
-
     public static void selectOlympiad(int index) {
         writeByte(1);
         writeInt(index);
     }
 
+    @Deprecated
     public static void exitOlymp() {
-        connection = 12;
+        connection = 3;
         writeByte(1);
     }
 
     public static void writeSource(File file, int task, int language) {
-        connection = 13;
+        connection = 5;
         sourceFile = file;
         writeByte(2);
         writeInt(task);
         writeByte(language);
         writeInt((int) file.length());
-    }
-
-    public static void dialogMsg(String msg) {
-        writeByte(1);
-        write(msg);
     }
 }

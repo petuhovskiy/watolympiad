@@ -10,7 +10,6 @@ import java.io.IOException;
 public class WatGUI extends JFrame {
     private static WatGUI gui;
     private static WatAuth authPanel;
-    private static WatConsole consolePanel;
     private static WatOlympiad olympiadPanel;
 
     public WatGUI() {
@@ -27,7 +26,6 @@ public class WatGUI extends JFrame {
 
     private void init() {
         authPanel = new WatAuth();
-        consolePanel = new WatConsole();
         olympiadPanel = new WatOlympiad();
     }
 
@@ -46,23 +44,8 @@ public class WatGUI extends JFrame {
         gui.pack();
     }
 
-    public static void showMenuPanel() {
-        gui.getContentPane().removeAll();
-        gui.getContentPane().add(new WatMenu());
-        gui.repaint();
-        gui.pack();
-    }
-
     public static WatGUI getGui() {
         return gui;
-    }
-
-    public static void showConsolePanel() {
-        gui.getContentPane().removeAll();
-        WatConsole.getWatConsole().unlock();
-        gui.getContentPane().add(consolePanel);
-        gui.repaint();
-        gui.pack();
     }
 
     public static void showOlympiadPanel() {

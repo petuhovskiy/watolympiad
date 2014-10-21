@@ -217,10 +217,6 @@ public class WatSocket implements Runnable {
         WatOlympiad.msgReceived(b, account, this);
     }
 
-    private void addConnection() {
-        //TODO: delete this
-    }
-
     private void deleteConnection() {
         WatOlympiad.setState(this, -1);
     }

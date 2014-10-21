@@ -61,11 +61,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals("exit")) {
             lock();
-            if (state == 0) {
-                WatNetwork.goToMenu();
-            } else {
-                WatNetwork.exitOlymp();
-            }
+            //ignored
         } else if (e.getActionCommand().equals("choosefile")) {
             int ret = J_FILE_CHOOSER.showDialog(WatGUI.getGui(), "Выбрать файл");
             if (ret == JFileChooser.APPROVE_OPTION) {
@@ -110,13 +106,6 @@ public class WatOlympiad extends JPanel implements ActionListener {
         olympTitles = s;
         state = 0;
         removeAll();
-        /*
-        exit = new JButton("exit");
-        exit.setVisible(false); //TODO
-        exit.setBounds(0, 0, 100, 40);
-        exit.setActionCommand("exit");
-        exit.addActionListener(this);
-        */
         JList<String> jList = new JList<String>(s);
         jList.setLayoutOrientation(JList.VERTICAL);
         jList.addMouseListener(new MouseAdapter() {
@@ -134,7 +123,6 @@ public class WatOlympiad extends JPanel implements ActionListener {
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         add(jsp);
-        //add(exit);
         repaint();
     }
 
@@ -318,7 +306,6 @@ public class WatOlympiad extends JPanel implements ActionListener {
     public void stopOlymp() {
         lock();
         if (timer != null) timer.stop();
-        currentTime.setText(formatDuration(duration));
     }
 
     public static WatOlympiad getWatOlympiad() {

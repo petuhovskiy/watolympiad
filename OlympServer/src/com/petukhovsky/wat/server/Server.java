@@ -12,7 +12,7 @@ import java.net.Socket;
  */
 public class Server {
 
-    private static final int DEFAULT_PORT = 4897;
+    private static final int DEFAULT_PORT = 4898;
     private static final boolean RETRY_ACCEPT_SOCKETS_ON_ERROR = true;
 
     private static ServerSocket serverSocket;

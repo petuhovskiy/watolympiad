@@ -4,7 +4,7 @@ package com.petukhovsky.wat.server;
  * Created by petuh_000 on 03.10.2014.
  */
 public class Log {
-    private static final boolean SHOW_DATA = false;
+    private static final boolean SHOW_DATA = true;
 
     public static void e(String s) {
         System.err.println(s);

@@ -100,6 +100,7 @@ public class Olympiad {
 
     public void start(long timeAfterStart) {
         if (isRunning) return;
+        if (timeAfterStart >= duration) return;
         startTime = System.currentTimeMillis() - timeAfterStart;
         timer.cancel();
         timer = new Timer();
@@ -119,6 +120,7 @@ public class Olympiad {
             if (-time < duration) start(-time);
             return;
         }
+        startTime = System.currentTimeMillis() + time;
         timer.cancel();
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -213,6 +215,16 @@ public class Olympiad {
 
     public String getId() {
         return id;
+    }
+
+    public String getState() {
+        long time = System.currentTimeMillis();
+        if (isRunning) {
+            return "Time passed: " + formatTime(time - startTime) + "\nTime remaining: " + formatTime(duration - time + startTime);
+        } else {
+            if (startTime == 0) return "Olympiad isn't running";
+            else return "Time before start: " + formatTime(startTime - time);
+        }
     }
 }
 

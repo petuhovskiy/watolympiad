@@ -7,18 +7,3 @@ public class Main {
         new WatGUI();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
