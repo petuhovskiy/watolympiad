@@ -272,7 +272,7 @@ public class WatNetwork implements Runnable {
         System.out.println("lol wtf: " + connection + " " + b);
     }
 
-    public static void register(String login, String pass) {
+    public static void register(String login, String pass, String fName, String sName) {
         if (connection != 0) {
             WatAuth.getWatAuth().unlock();
             return;
@@ -281,6 +281,8 @@ public class WatNetwork implements Runnable {
         writeByte(1);
         write(login);
         write(pass);
+        write(fName);
+        write(sName);
     }
 
     public static void auth(String login, String pass) {

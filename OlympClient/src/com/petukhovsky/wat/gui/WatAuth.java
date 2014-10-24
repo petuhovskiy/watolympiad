@@ -18,11 +18,19 @@ public class WatAuth extends JPanel implements ActionListener {
     private JPasswordField passField;
     private JButton authButton;
     private JButton regButton;
+    private JTextField loginReg;
+    private JPasswordField passReg;
+    private JTextField fNameReg;
+    private JTextField sNameReg;
 
     public WatAuth() {
-        setLayout(null);
+        setLayout(new BorderLayout());
         authPanel = this;
         setBackground(Color.WHITE);
+        JTabbedPane jTabbedPane = new JTabbedPane();
+        JPanel loginPanel = new JPanel();
+        loginPanel.setBackground(Color.WHITE);
+        loginPanel.setLayout(null);
         loginField = new JTextField();
         passField = new JPasswordField();
         loginField.setToolTipText("Login");
@@ -36,17 +44,54 @@ public class WatAuth extends JPanel implements ActionListener {
         authButton = new JButton("Войти");
         authButton.setActionCommand("login");
         authButton.addActionListener(this);
+        int x = 305;
+        int y = 230;
+        int w = 190;
+        int h = 26;
+        int o = 34;
+        loginField.setBounds(x, y, w, h);
+        passField.setBounds(x, y + o*1, w, h);
+        authButton.setBounds(x, y + o*2, w, h);
+        loginPanel.add(loginField);
+        loginPanel.add(passField);
+        loginPanel.add(authButton);
+        jTabbedPane.addTab("Войти", loginPanel);
+        JPanel regPanel = new JPanel();
+        regPanel.setBackground(Color.WHITE);
+        regPanel.setLayout(null);
+        loginReg = new JTextField();
+        passReg = new JPasswordField();
+        fNameReg = new JTextField();
+        sNameReg = new JTextField();
         regButton = new JButton("Зарегистрироваться");
+        loginReg.setToolTipText("Логин");
+        passReg.setToolTipText("Пароль");
+        fNameReg.setToolTipText("Имя на белорусском");
+        sNameReg.setToolTipText("Фамилия на белорусском");
+        loginReg.setActionCommand("register");
+        passReg.setActionCommand("register");
+        fNameReg.setActionCommand("register");
+        sNameReg.setActionCommand("register");
         regButton.setActionCommand("register");
+        loginReg.addActionListener(this);
+        passReg.addActionListener(this);
+        fNameReg.addActionListener(this);
+        sNameReg.addActionListener(this);
         regButton.addActionListener(this);
-        loginField.setBounds(240, 267, 150, 26);
-        passField.setBounds(240, 297, 150, 26);
-        authButton.setBounds(410, 267, 150, 26);
-        regButton.setBounds(410, 297, 150, 26);
-        add(loginField);
-        add(passField);
-        add(authButton);
-        add(regButton);
+        x = 305;
+        y = 170;
+        loginReg.setBounds(x, y, w, h);
+        passReg.setBounds(x, y + o*1, w, h);
+        fNameReg.setBounds(x, y + o*2, w, h);
+        sNameReg.setBounds(x, y + o*3, w, h);
+        regButton.setBounds(x, y + o*4, w, h);
+        regPanel.add(loginReg);
+        regPanel.add(passReg);
+        regPanel.add(fNameReg);
+        regPanel.add(sNameReg);
+        regPanel.add(regButton);
+        jTabbedPane.add("Зарегистрироваться", regPanel);
+        add(jTabbedPane);
     }
 
     @Override
@@ -61,7 +106,7 @@ public class WatAuth extends JPanel implements ActionListener {
             WatNetwork.auth(loginField.getText(), String.copyValueOf(passField.getPassword()));
         } else if (e.getActionCommand().equals("register")) {
             lock();
-            WatNetwork.register(loginField.getText(), String.copyValueOf(passField.getPassword()));
+            WatNetwork.register(loginReg.getText(), String.copyValueOf(passReg.getPassword()), fNameReg.getText(), sNameReg.getText());
         }
     }
 

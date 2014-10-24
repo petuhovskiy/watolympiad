@@ -30,7 +30,7 @@ public class SQLite {
             ResultSet rs = statement.executeQuery("select * from accs");
             while (rs.next()) {
                 String username = rs.getString("Username");
-                res.put(username.toLowerCase(), new Account(rs.getInt("ID"), username, rs.getString("Password"), rs.getInt("Superuser"), rs.getInt("Type"), rs.getString("Color")));
+                res.put(username.toLowerCase(), new Account(rs.getInt("ID"), username, rs.getString("Password"), rs.getInt("Superuser"), rs.getInt("Type"), rs.getString("Color"), rs.getString("belarussian_first_name"), rs.getString("belarussian_second_name")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class SQLite {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
 
-            statement.execute(String.format("INSERT INTO accs (ID, Username, Password, Superuser, Type, Color) VALUES (%d, '%s', '%s', %d, %d, '%s')", acc.getId(), acc.getLogin(), acc.getPass(), acc.getSuperuser(), acc.getType(), acc.getColor()));
+            statement.execute(String.format("INSERT INTO accs (ID, Username, Password, Superuser, Type, Color, belarussian_first_name, belarussian_second_name) VALUES (%d, '%s', '%s', %d, %d, '%s', '%s', '%s')", acc.getId(), acc.getLogin(), acc.getPass(), acc.getSuperuser(), acc.getType(), acc.getColor(), acc.getFirstName(), acc.getSecondName()));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {

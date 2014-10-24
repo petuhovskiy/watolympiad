@@ -12,14 +12,18 @@ public class Account {
     private int superuser;
     private int type;
     private String color;
+    private String fName;
+    private String sName;
 
-    Account(int id, String login, String pass, int superuser, int type, String color) {
+    Account(int id, String login, String pass, int superuser, int type, String color, String fName, String sName) {
         this.id = id;
         this.login = login;
         this.pass = pass;
         this.superuser = superuser;
         this.type = type;
         this.color = color;
+        this.fName = fName;
+        this.sName = sName;
     }
 
     @Override
@@ -66,13 +70,21 @@ public class Account {
         SQLite.updateAccount(id, "Color", color);
     }
 
-    public static Account create(int id, String login, String pass, int superuser, int type, String color) {
-        Account acc = new Account(id, login, pass, superuser, type, color);
+    public static Account create(int id, String login, String pass, int superuser, int type, String color, String fName, String sName) {
+        Account acc = new Account(id, login, pass, superuser, type, color, fName, sName);
         SQLite.writeAccount(acc);
         return acc;
     }
 
     public String getColoredUsername() {
         return "<font color=\"" + getColor() + "\">" + getLogin() + "</font>";
+    }
+
+    public String getFirstName() {
+        return fName;
+    }
+
+    public String getSecondName() {
+        return sName;
     }
 }
