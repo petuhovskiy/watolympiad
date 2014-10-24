@@ -1,8 +1,11 @@
 package com.petukhovsky.wat.gui;
 
+import javafx.util.Pair;
+
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Created by Arthur on 23.09.2014.
@@ -199,7 +202,14 @@ public class WatNetwork implements Runnable {
                         String source = read();
                         WatOlympiad.getWatOlympiad().addState(id, time, task, status, language, msg, source);
                     }
-                    WatOlympiad.getWatOlympiad().showOlympPanel(arr, duration);
+                    int messages = readInt();
+                    ArrayList<Pair<Integer, String>> m = new ArrayList<>();
+                    for (int i = 0; i < messages; i++) {
+                        int id = readInt();
+                        String msg = read();
+                        m.add(new Pair<>(id, msg));
+                    }
+                    WatOlympiad.getWatOlympiad().showOlympPanel(arr, duration, m);
                     connection = 4;
                 }
                 return;
@@ -223,6 +233,10 @@ public class WatNetwork implements Runnable {
                     int status = readInt();
                     String msg = read();
                     WatOlympiad.getWatOlympiad().changeState(id, status, msg);
+                } else if (b == 6) {
+                    int id = readInt();
+                    String msg = read();
+                    WatOlympiad.getWatOlympiad().messageUpdate(id, msg);
                 }
                 return;
             case 5:
@@ -298,5 +312,10 @@ public class WatNetwork implements Runnable {
         writeInt(task);
         writeByte(language);
         writeInt((int) file.length());
+    }
+
+    public static void sendMessage(String text) {
+        writeByte(1);
+        write(text);
     }
 }

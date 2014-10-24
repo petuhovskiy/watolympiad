@@ -1,5 +1,6 @@
 package com.petukhovsky.wat.gui;
 
+import javafx.util.Pair;
 import jsyntaxpane.DefaultSyntaxKit;
 
 import javax.swing.*;
@@ -27,8 +28,6 @@ public class WatOlympiad extends JPanel implements ActionListener {
 
     private static WatOlympiad watOlympiad;
     private long duration;
-    private JButton exit;
-    private boolean isLocked;
     private int state;
     private ArrayList<TaskState> taskStates = new ArrayList<TaskState>();
     private String[] taskNames;
@@ -44,6 +43,10 @@ public class WatOlympiad extends JPanel implements ActionListener {
     private JComboBox<String> languageChooser;
     private JButton sendButton;
     private int timeShow = 0;
+    private JEditorPane msgPane;
+    private DefaultListModel<String> msgModel;
+    private JList<String> msgList;
+    private ArrayList<Pair<Integer, String>> messages;
 
     public WatOlympiad() {
         DefaultSyntaxKit.initKit();
@@ -91,18 +94,15 @@ public class WatOlympiad extends JPanel implements ActionListener {
     }
 
     public void lock() {
-        //exit.setEnabled(false);
         if (state == 1) sendButton.setEnabled(false);
-        isLocked = true;
     }
 
     public void unlock() {
-        //exit.setEnabled(true);
         if (state == 1) sendButton.setEnabled(true);
-        isLocked = false;
     }
 
     public void showChoosePanel(String[] s) {
+        setLayout(null);
         olympTitles = s;
         state = 0;
         removeAll();
@@ -131,7 +131,8 @@ public class WatOlympiad extends JPanel implements ActionListener {
         else return formatDuration(duration - System.currentTimeMillis() + startTime);
     }
 
-    public void showOlympPanel(String[] arr, long duration) {
+    public void showOlympPanel(String[] arr, long duration, final ArrayList<Pair<Integer, String>> messages) {
+        setLayout(new BorderLayout());
         stopTimer();
         state = 1;
         currentTime = new JLabel();
@@ -152,14 +153,11 @@ public class WatOlympiad extends JPanel implements ActionListener {
         });
         taskNames = arr;
         removeAll();
+        JTabbedPane jTabbedPane = new JTabbedPane();
+        JPanel olymp = new JPanel();
+        olymp.setLayout(null);
+        olymp.setBackground(Color.WHITE);
         this.duration = duration;
-        /*
-        exit = new JButton("Назад");
-        exit.setVisible(false); //TODO
-        exit.setBounds(10, 10, 80, 25);
-        exit.setActionCommand("exit");
-        exit.addActionListener(this);
-        */
         filePathField = new JTextField();
         filePathField.setBounds(5, 10, 211, 25);
         JButton chooseButton = new JButton("Обзор");
@@ -191,33 +189,85 @@ public class WatOlympiad extends JPanel implements ActionListener {
         infoTable.getRowSorter().toggleSortOrder(0);
         infoTable.getRowSorter().toggleSortOrder(0);
         JScrollPane jsp = new JScrollPane(infoTable);
-        jsp.setBounds(5, 38, 392, 434);
+        jsp.setBounds(5, 38, 392, 406);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        add(jsp);
+        olymp.add(jsp);
         sourcePanel = new JEditorPane();
         sourcePanel.setEditable(false);
         jsp = new JScrollPane(sourcePanel);
         sourcePanel.setContentType("text/c");
-        jsp.setBounds(400, 38, 395, 434);
+        jsp.setBounds(400, 38, 395, 406);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        add(jsp);
+        olymp.add(jsp);
         pretestsPanel = new JTextPane();
         pretestsPanel.setContentType("text/html");
         pretestsPanel.setEditable(false);
         jsp = new JScrollPane(pretestsPanel);
-        jsp.setBounds(5, 475, 790, 120);
+        jsp.setBounds(5, 447, 790, 120);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        add(jsp);
-        add(chooseButton);
-        add(languageChooser);
-        add(filePathField);
-        add(currentTime);
-        add(taskChooser);
-        //add(exit);
-        add(sendButton);
+        olymp.add(jsp);
+        olymp.add(chooseButton);
+        olymp.add(languageChooser);
+        olymp.add(filePathField);
+        olymp.add(currentTime);
+        olymp.add(taskChooser);
+        olymp.add(sendButton);
+        jTabbedPane.addTab("Задачи", olymp);
+        final JPanel msgPanel = new JPanel();
+        msgPanel.setLayout(null);
+        msgPanel.setBackground(Color.WHITE);
+        msgPane = new JEditorPane();
+        msgPane.setEditable(false);
+        jsp = new JScrollPane(msgPane);
+        jsp.setBounds(5, 235, 790, 328);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        msgPanel.add(jsp);
+        msgList = new JList<String>();
+        msgList.setLayoutOrientation(JList.VERTICAL);
+        msgModel = new DefaultListModel<String>();
+        msgList.setModel(msgModel);
+        this.messages = messages;
+        for (int i = 0; i < messages.size(); i++) msgModel.addElement(messages.get(i).getValue());
+        msgList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        msgList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                int i = msgList.getSelectedIndex();
+                msgPane.setText(messages.get(i).getValue());
+            }
+        });
+        jsp = new JScrollPane(msgList);
+        jsp.setBounds(5, 5, 790, 200);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        msgPanel.add(jsp);
+        jTabbedPane.addTab("Сообщения", msgPanel);
+        JPanel questionPanel = new JPanel();
+        questionPanel.setLayout(null);
+        questionPanel.setBackground(Color.WHITE);
+        final JEditorPane questionPane = new JEditorPane();
+        questionPane.setEditable(true);
+        jsp = new JScrollPane(questionPane);
+        jsp.setBounds(5, 5, 790, 200);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        questionPanel.add(jsp);
+        JButton answer = new JButton("Задать вопрос");
+        answer.setBounds(5, 207, 150, 25);
+        answer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                WatNetwork.sendMessage(questionPane.getText());
+                questionPane.setText("");
+            }
+        });
+        questionPanel.add(answer);
+        jTabbedPane.addTab("Задать вопрос", questionPanel);
+        add(jTabbedPane);
         lock();
         repaint();
     }
@@ -233,49 +283,22 @@ public class WatOlympiad extends JPanel implements ActionListener {
             }
         });
     }
-    /*
-    private String formatSource(String source) {
-        String res = "<style>.def{color: green;} .blue{color: blue;} .red{color: red;}</style><pre>";
-        //source = source.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-        String[] arr = source.split("\n");
-        for (int i = 0; i < arr.length - 1; i++) res += formatSourceLine(arr[i]) + "<br>";
-        if (arr.length > 0) res += formatSourceLine(arr[arr.length-1]);
-        res += "</pre>";
-        return res;
-    }
 
-    private String formatSourceLine(String s) {
-        String res = "";
-        res += "<span>";
-        String buf = "";
-        Pattern p = Pattern.compile("[\\w]");
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c == '#') {
-                return res + buf + "</span><span class=\"def\">" + s.substring(i) + "</span>";
-            }
-            if (c == '"') {
-                res += buf + "</span><span class=\"blue\">\"";
-                buf = "";
-                i++;
-                while (i < s.length() && s.charAt(i) != '"') {
-                    res += s.charAt(i);
-                    i++;
+    public void messageUpdate(int id, String msg) {
+        for (int i = 0; i < messages.size(); i++) {
+            if (messages.get(i).getKey() == id) {
+                messages.set(i, new Pair<Integer, String>(id, msg));
+                msgModel.setElementAt(msg, i);
+                if (msgList.getSelectedIndex() == i) {
+                    msgPane.setText(msg);
                 }
-                res += "\"</span><span>";
-                continue;
-            }
-            if (p.matcher(String.valueOf(c)).matches()) {
-                buf += s.charAt(i);
-            } else {
-                res += buf;
-                buf = "";
-
+                return;
             }
         }
-        return res + buf + "</span>";
+        messages.add(new Pair<Integer, String>(id, msg));
+        msgModel.addElement(msg);
     }
-    */
+
     private void stopTimer() {
         if (timer != null) timer.stop();
     }

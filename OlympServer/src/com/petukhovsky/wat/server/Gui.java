@@ -1,9 +1,14 @@
 package com.petukhovsky.wat.server;
 
+import javafx.util.Pair;
+
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -14,7 +19,12 @@ public class Gui extends JFrame {
     private static Gui gui;
     private final JTabbedPane tabbedPane;
     private JEditorPane testPane;
+    private JEditorPane msgPane;
+    private DefaultListModel<String> msgModel;
+    private JList<String> msgList;
+    private ArrayList<Pair<Integer, String>> messages = new ArrayList<Pair<Integer, String>>();
     private HashMap<Olympiad, JEditorPane> results = new HashMap<Olympiad, JEditorPane>();
+    private JComboBox<String> olympChooser;
 
     public Gui() {
         setLookAndFeel();
@@ -40,10 +50,67 @@ public class Gui extends JFrame {
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         testing.add(jsp);
         tabbedPane.addTab("Testing", testing);
+        final JPanel messagesPane = new JPanel();
+        messagesPane.setLayout(null);
+        msgPane = new JEditorPane();
+        msgPane.setEditable(true);
+        jsp = new JScrollPane(msgPane);
+        jsp.setBounds(5, 5, 790, 250);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        messagesPane.add(jsp);
+        msgList = new JList<String>();
+        msgList.setLayoutOrientation(JList.VERTICAL);
+        msgModel = new DefaultListModel<String>();
+        msgList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        msgList.setModel(msgModel);
+        final JButton answer = new JButton("Ответить");
+        msgList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                answer.setEnabled(true);
+                int i = msgList.getSelectedIndex();
+                msgPane.setText(messages.get(i).getValue());
+            }
+        });
+        jsp = new JScrollPane(msgList);
+        jsp.setBounds(5, 285, 790, 278);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        messagesPane.add(jsp);
+        answer.setBounds(5, 257, 100, 25);
+        answer.setEnabled(false);
+        answer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int i = msgList.getSelectedIndex();
+                WatOlympiad.answerQuestion(messages.get(i).getKey(), msgPane.getText());
+            }
+        });
+        messagesPane.add(answer);
+        JButton answerToAll = new JButton("Отправить всем");
+        answerToAll.setBounds(110, 257, 150, 25);
+        olympChooser = new JComboBox<String>();
+        olympChooser.setBounds(263, 257, 150, 25);
+        answerToAll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int i = msgList.getSelectedIndex();
+                WatOlympiad.messageReceived(-1, olympChooser.getSelectedIndex(), msgPane.getText());
+            }
+        });
+        messagesPane.add(olympChooser);
+        messagesPane.add(answerToAll);
+        tabbedPane.addTab("Messages", messagesPane);
         add(tabbedPane);
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
+    }
+
+    public void updateOlympiadTitles() {
+        String[] s = WatOlympiad.getOlympiadsTitles();
+        for (int i = 0; i < s.length; i++) olympChooser.addItem(s[i]);
     }
 
     private static void setLookAndFeel() {
@@ -65,6 +132,18 @@ public class Gui extends JFrame {
                 testPane.setText(s);
             }
         });
+    }
+
+    public void updateMessage(int id, final String msg) {
+        for (int i = 0; i < messages.size(); i++) {
+            if (messages.get(i).getKey() == id) {
+                messages.set(i, new Pair<Integer, String>(id, msg));
+                msgModel.setElementAt(msg, i);
+                return;
+            }
+        }
+        msgModel.addElement(msg);
+        messages.add(new Pair<Integer, String>(id, msg));
     }
 
     public void setResults(final Olympiad olympiad, final String s) {
