@@ -8,14 +8,14 @@ import java.net.Socket;
  * Created by Arthur on 23.09.2014.
  */
 public class WatNetwork implements Runnable {
-    private final static String SERVER_IP = "localhost";
+    private final static String SERVER_IP = "192.168.1.228";
     private final static int PORT = 4898;
 
     private static Socket socket = null;
     private static DataInputStream dis = null;
     private static DataOutputStream dos = null;
     private static int connection = -1;
-    private static File sourceFile;
+    private static byte[] sourceFile;
 
     @Override
     public void run() {
@@ -128,6 +128,18 @@ public class WatNetwork implements Runnable {
         }
     }
 
+    private static void writeArrayByte(byte[] arr) {
+        if (dos == null) return;
+        try {
+            dos.write(arr);
+            dos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error while writing array of bytes");
+            destroy();
+        }
+    }
+
     public static void writeInt(int b) {
         if (dos == null) return;
         try {
@@ -231,27 +243,8 @@ public class WatNetwork implements Runnable {
                     WatOlympiad.getWatOlympiad().unlock();
                     return;
                 }
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(sourceFile);
-                    int r;
-                    int k = 0;
-                    while (fis.available() != 0) {
-                        writeByte(fis.read());
-                        k++;
-                    }
-                    connection = 4;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    destroy();
-                } finally {
-                    try {
-                        assert fis != null;
-                        fis.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                writeArrayByte(sourceFile);
+                connection = 4;
                 WatOlympiad.getWatOlympiad().unlock();
                 return;
         }
@@ -293,10 +286,23 @@ public class WatNetwork implements Runnable {
 
     public static void writeSource(File file, int task, int language) {
         connection = 5;
-        sourceFile = file;
+        InputStream is = null;
+        sourceFile = new byte[(int) file.length()];
+        try {
+            is = new FileInputStream(file);
+            is.read(sourceFile);
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                assert is != null;
+                is.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
         writeByte(2);
         writeInt(task);
         writeByte(language);
-        writeInt((int) file.length());
+        writeInt(sourceFile.length);
     }
 }

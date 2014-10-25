@@ -120,6 +120,18 @@ public class WatSocket implements Runnable {
         return -1;
     }
 
+    public byte[] readByteArray(int length) {
+        byte[] arr = new byte[length];
+        try {
+            dis.read(arr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("Error while reading array of bytes.");
+            destroy();
+        }
+        return arr;
+    }
+
     public long readLong() {
         if (dis == null) return -1;
         try {

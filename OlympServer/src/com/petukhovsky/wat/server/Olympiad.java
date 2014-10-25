@@ -132,14 +132,15 @@ public class Olympiad {
     }
 
     public Source writeSourceFile(WatSocket ws, int fileLength, int type, int task, Account account) {
+        Log.d("write source file " + fileLength);
         Source source = addSource(type, task, account);
         File file = source.getFile();
-        BufferedWriter writer = null;
+        OutputStream writer = null;
         try {
-            writer = new BufferedWriter(new FileWriter(file));
-            for (int i = 0; i < fileLength; i++) {
-                writer.write(ws.readByte());
-            }
+            writer = new FileOutputStream(file);
+            byte[] f = ws.readByteArray(fileLength);
+            writer.write(f);
+            Log.d("write successful");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
