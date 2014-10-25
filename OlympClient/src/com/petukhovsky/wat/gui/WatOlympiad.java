@@ -1,6 +1,5 @@
 package com.petukhovsky.wat.gui;
 
-import javafx.util.Pair;
 import jsyntaxpane.DefaultSyntaxKit;
 
 import javax.swing.*;

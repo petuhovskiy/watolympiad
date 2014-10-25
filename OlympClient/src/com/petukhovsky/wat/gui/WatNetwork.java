@@ -1,7 +1,5 @@
 package com.petukhovsky.wat.gui;
 
-import javafx.util.Pair;
-
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
