@@ -36,6 +36,7 @@ public class Server {
         new Gui();
         Auth.init();
         WatOlympiad.init();
+        Gui.getGui().updateOlympiadTitles();
     }
 
     public static void fatalError(String s) {

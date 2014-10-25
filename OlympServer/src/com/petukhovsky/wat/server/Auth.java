@@ -47,10 +47,10 @@ public class Auth {
         }
     }
 
-    public static Account register(String login, String password) {
+    public static Account register(String login, String password, String fName, String sName) {
         if (!checkPass(password)) return null;
         if (accounts.containsKey(login.toLowerCase())) return null;
-        Account account = Account.create(accounts.size(), login, sha256(password), 0, 0, "black");
+        Account account = Account.create(accounts.size(), login, sha256(password), 0, 0, "black", fName, sName);
         accounts.put(login.toLowerCase(), account);
         return account;
     }
@@ -59,12 +59,6 @@ public class Auth {
         if (!accounts.containsKey(login.toLowerCase())) return null;
         if (!accounts.get(login.toLowerCase()).getPass().equals(sha256(password))) return null;
         return accounts.get(login.toLowerCase());
-    }
-
-    public static Account authWithReg(String login, String password) {
-        if (accounts.containsKey(login.toLowerCase()))
-            return auth(login, password);
-        else return register(login, password);
     }
 
     private static boolean checkPass(String password) {

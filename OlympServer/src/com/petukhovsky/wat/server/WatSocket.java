@@ -50,7 +50,9 @@ public class WatSocket implements Runnable {
                 account = Auth.auth(login, pass);
                 break;
             case 1:
-                account = Auth.register(login, pass);
+                String fName = read();
+                String sName = read();
+                account = Auth.register(login, pass, fName, sName);
                 break;
             default:
                 Log.d("Look just like incorrect request. IP: " + getIp());

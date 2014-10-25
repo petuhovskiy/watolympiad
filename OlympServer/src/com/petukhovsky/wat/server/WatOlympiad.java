@@ -1,7 +1,9 @@
 package com.petukhovsky.wat.server;
 
+import javafx.util.Pair;
+
+import javax.swing.*;
 import java.io.File;
-import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +13,7 @@ import java.util.Map;
  * Created by Arthur on 26.09.2014.
  */
 public class WatOlympiad implements Runnable{
-    private static final int MAX_FILE_LENGTH = 262144;
+    private static final int MAX_FILE_LENGTH = 65536;
     private static final String CHECK_DIR = Checker.RES_DIR + "test";
 
     private static HashMap<WatSocket, Integer> states = new HashMap<WatSocket, Integer>();
@@ -35,6 +37,7 @@ public class WatOlympiad implements Runnable{
             if (new File(location + s).isDirectory()) olympiads.add(new Olympiad(location + s, s));
         }
         SQLite.getCheckQueue();
+        SQLite.setGuiMessages();
         new Thread(new WatOlympiad()).start();
     }
 
@@ -46,8 +49,8 @@ public class WatOlympiad implements Runnable{
                 if (i >= olympiads.size() || i < 0) ws.writeByte(0);
                 else {
                     ws.writeByte(1);
-                    states.put(ws, i+1);
                     sendInfo(ws, olympiads.get(i), account);
+                    states.put(ws, i + 1);
                 }
             }
             return;
@@ -58,6 +61,10 @@ public class WatOlympiad implements Runnable{
             ws.writeInt(olympiads.size());
             for (Olympiad olympiad : olympiads) ws.write(olympiad.getName());
             return;
+        }
+        if (b == 1) {
+            String msg = ws.read();
+            messageReceived(account.getId(), state - 1, msg);
         }
         if (b == 2) {
             int task = ws.readInt();
@@ -73,6 +80,18 @@ public class WatOlympiad implements Runnable{
         }
     }
 
+    public static void messageReceived(int account, int olympiad, String msg) {
+        int id = SQLite.writeMessage(account, msg, olympiads.get(olympiad).getId());
+        for (Map.Entry<WatSocket, Integer> s : states.entrySet()) {
+            if (s.getValue() == olympiad + 1 && (account == -1 || s.getKey().getAccount().getId() == account)) {
+                s.getKey().writeByte(6);
+                s.getKey().writeInt(id);
+                s.getKey().write(msg);
+            }
+        }
+        Gui.getGui().updateMessage(id, msg);
+    }
+
     public static void addCheckTask(Source source) {
         checkQueue.addLast(source);
     }
@@ -84,6 +103,12 @@ public class WatOlympiad implements Runnable{
         }
         ws.writeLong(olympiad.getDuration());
         olympiad.sendStates(ws, account);
+        ArrayList<Pair<Integer, String>> messages = SQLite.getMessages(account.getId(), olympiad.getId());
+        ws.writeInt(messages.size());
+        for (Pair<Integer, String> s : messages) {
+            ws.writeInt(s.getKey());
+            ws.write(s.getValue());
+        }
         if (olympiad.isRunning()) {
             ws.writeByte(2);
             ws.writeLong(olympiad.getTimeFromStart());
@@ -151,10 +176,6 @@ public class WatOlympiad implements Runnable{
         }
     }
 
-    public static void consoleStart(int num, long startAfter) {
-        olympiads.get(num).startAfter(startAfter);
-    }
-
     public static void sendStateWithoutConnection(Olympiad olympiad, Account account, Source source) {
         int num = getOlympiadIndex(olympiad);
         if (num == -1) return;
@@ -196,5 +217,23 @@ public class WatOlympiad implements Runnable{
             if (i.getId().equals(id)) return i;
         }
         return null;
+    }
+
+    public static void answerQuestion(int id, String text) {
+        Pair<Integer, String> q = SQLite.answerQuestion(id, text);
+        for (Map.Entry<WatSocket, Integer> s : states.entrySet()) {
+            if (s.getValue() > 0 && olympiads.get(s.getValue()-1).getId().equals(q.getValue()) && (q.getKey() == -1 || s.getKey().getAccount().getId() == q.getKey())) {
+                s.getKey().writeByte(6);
+                s.getKey().writeInt(id);
+                s.getKey().write(text);
+            }
+        }
+        Gui.getGui().updateMessage(id, text);
+    }
+
+    public static String[] getOlympiadsTitles() {
+        String[] arr = new String[olympiads.size()];
+        for (int i = 0; i < olympiads.size(); i++) arr[i] = olympiads.get(i).getName();
+        return arr;
     }
 }

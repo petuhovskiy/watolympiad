@@ -1,5 +1,7 @@
 package com.petukhovsky.wat.server;
 
+import javafx.util.Pair;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +30,7 @@ public class SQLite {
             ResultSet rs = statement.executeQuery("select * from accs");
             while (rs.next()) {
                 String username = rs.getString("Username");
-                res.put(username.toLowerCase(), new Account(rs.getInt("ID"), username, rs.getString("Password"), rs.getInt("Superuser"), rs.getInt("Type"), rs.getString("Color")));
+                res.put(username.toLowerCase(), new Account(rs.getInt("ID"), username, rs.getString("Password"), rs.getInt("Superuser"), rs.getInt("Type"), rs.getString("Color"), rs.getString("belarussian_first_name"), rs.getString("belarussian_second_name")));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -49,7 +51,7 @@ public class SQLite {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
 
-            statement.execute(String.format("INSERT INTO accs (ID, Username, Password, Superuser, Type, Color) VALUES (%d, '%s', '%s', %d, %d, '%s')", acc.getId(), acc.getLogin(), acc.getPass(), acc.getSuperuser(), acc.getType(), acc.getColor()));
+            statement.execute(String.format("INSERT INTO accs (ID, Username, Password, Superuser, Type, Color, belarussian_first_name, belarussian_second_name) VALUES (%d, '%s', '%s', %d, %d, '%s', '%s', '%s')", acc.getId(), acc.getLogin(), acc.getPass(), acc.getSuperuser(), acc.getType(), acc.getColor(), acc.getFirstName(), acc.getSecondName()));
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -238,5 +240,102 @@ public class SQLite {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static int writeMessage(int account, String msg, String olymp) {
+        Connection connection = null;
+        try{
+            connection = DriverManager.getConnection("jdbc:sqlite:" + Checker.RES_DIR + "watserver.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+
+            statement.execute(String.format("INSERT INTO messages (account, msg, olymp) " +
+                            "VALUES (%d, '%s', '%s')", account, msg, olymp));
+            ResultSet r = statement.executeQuery("SELECT MAX(id) FROM messages");
+            while (r.next()) {
+                return r.getInt("MAX(id)");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d("writeMessage error SQLite");
+        return -1;
+    }
+
+    public static ArrayList<Pair<Integer, String>> getMessages(int account, String olymp) {
+        Connection connection = null;
+        ArrayList<Pair<Integer, String>> res = new ArrayList<Pair<Integer, String>>();
+        try{
+            connection = DriverManager.getConnection("jdbc:sqlite:" + Checker.RES_DIR + "watserver.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+
+            ResultSet r = statement.executeQuery(String.format("SELECT id, msg FROM messages WHERE (account=%d)OR(account=-1)AND(olymp='%s')", account, olymp));
+            while (r.next()) {
+                res.add(new Pair<Integer, String>(r.getInt("id"), r.getString("msg")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return res;
+    }
+
+    public static void setGuiMessages() {
+        Connection connection = null;
+        try{
+            connection = DriverManager.getConnection("jdbc:sqlite:" + Checker.RES_DIR + "watserver.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+
+            ResultSet r = statement.executeQuery(String.format("SELECT id, msg FROM messages"));
+            while (r.next()) {
+                Gui.getGui().updateMessage(r.getInt("id"), r.getString("msg"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static Pair<Integer, String> answerQuestion(int id, String text) {
+        Connection connection = null;
+        try{
+            connection = DriverManager.getConnection("jdbc:sqlite:" + Checker.RES_DIR + "watserver.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+
+            statement.execute(String.format("UPDATE messages SET msg = '%s' WHERE id = %d", text, id));
+            ResultSet r = statement.executeQuery(String.format("SELECT account, olymp FROM messages WHERE id = '%d'", id));
+            while (r.next()) {
+                return new Pair<Integer, String>(r.getInt("account"), r.getString("olymp"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d("answerQuestion fail SQLite");
+        return null;
     }
 }
