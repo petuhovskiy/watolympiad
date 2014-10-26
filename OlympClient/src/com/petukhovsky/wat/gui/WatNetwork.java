@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * Created by Arthur on 23.09.2014.
  */
 public class WatNetwork implements Runnable {
-    private final static String SERVER_IP = "192.168.1.228";
+    private final static String SERVER_IP = "petuhovskiy.dlinkddns.com";
     private final static int PORT = 4898;
 
     private static Socket socket = null;
@@ -290,12 +290,6 @@ public class WatNetwork implements Runnable {
     public static void selectOlympiad(int index) {
         writeByte(1);
         writeInt(index);
-    }
-
-    @Deprecated
-    public static void exitOlymp() {
-        connection = 3;
-        writeByte(1);
     }
 
     public static void writeSource(File file, int task, int language) {

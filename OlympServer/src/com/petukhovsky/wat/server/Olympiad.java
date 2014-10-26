@@ -82,7 +82,8 @@ public class Olympiad {
     }
 
     public long getTimeFromStart() {
-        return System.currentTimeMillis() - startTime;
+        if (startTime == 0) return 0;
+        return Math.max(0, System.currentTimeMillis() - startTime);
     }
 
     public boolean isRunning() {
@@ -132,7 +133,6 @@ public class Olympiad {
     }
 
     public Source writeSourceFile(WatSocket ws, int fileLength, int type, int task, Account account) {
-        Log.d("write source file " + fileLength);
         Source source = addSource(type, task, account);
         File file = source.getFile();
         OutputStream writer = null;
@@ -140,7 +140,6 @@ public class Olympiad {
             writer = new FileOutputStream(file);
             byte[] f = ws.readByteArray(fileLength);
             writer.write(f);
-            Log.d("write successful");
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -168,7 +167,7 @@ public class Olympiad {
         return SQLite.getSourceID(id)+1;
     }
 
-    private String formatTime(long s) {
+    public static String formatTime(long s) {
         s /= 1000;
         return String.format("%02d:%02d:%02d", s/3600, (s%3600)/60, (s%60));
     }

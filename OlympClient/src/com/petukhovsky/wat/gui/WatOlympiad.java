@@ -14,8 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.regex.Pattern;
 
 /**
  * Created by Arthur on 23.09.2014.
@@ -46,6 +44,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
     private DefaultListModel<String> msgModel;
     private JList<String> msgList;
     private ArrayList<Pair<Integer, String>> messages;
+    private JButton askButton;
 
     public WatOlympiad() {
         DefaultSyntaxKit.initKit();
@@ -61,10 +60,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals("exit")) {
-            lock();
-            //ignored
-        } else if (e.getActionCommand().equals("choosefile")) {
+        if (e.getActionCommand().equals("choosefile")) {
             int ret = J_FILE_CHOOSER.showDialog(WatGUI.getGui(), "Выбрать файл");
             if (ret == JFileChooser.APPROVE_OPTION) {
                 String s = J_FILE_CHOOSER.getSelectedFile().getPath();
@@ -93,11 +89,17 @@ public class WatOlympiad extends JPanel implements ActionListener {
     }
 
     public void lock() {
-        if (state == 1) sendButton.setEnabled(false);
+        if (state == 1) {
+            sendButton.setEnabled(false);
+            askButton.setEnabled(false);
+        }
     }
 
     public void unlock() {
-        if (state == 1) sendButton.setEnabled(true);
+        if (state == 1) {
+            sendButton.setEnabled(true);
+            askButton.setEnabled(true);
+        }
     }
 
     public void showChoosePanel(String[] s) {
@@ -118,7 +120,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
             }
         });
         JScrollPane jsp = new JScrollPane(jList);
-        jsp.setBounds(10, 50, 780, 500);
+        jsp.setBounds(10, 20, 780, 560);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         add(jsp);
@@ -221,7 +223,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
         msgPane = new JEditorPane();
         msgPane.setEditable(false);
         jsp = new JScrollPane(msgPane);
-        jsp.setBounds(5, 235, 790, 328);
+        jsp.setBounds(5, 208, 790, 355);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         msgPanel.add(jsp);
@@ -241,7 +243,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
         });
         jsp = new JScrollPane(msgList);
         jsp.setBounds(5, 5, 790, 200);
-        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         msgPanel.add(jsp);
         jTabbedPane.addTab("Сообщения", msgPanel);
@@ -251,20 +253,22 @@ public class WatOlympiad extends JPanel implements ActionListener {
         final JEditorPane questionPane = new JEditorPane();
         questionPane.setEditable(true);
         jsp = new JScrollPane(questionPane);
-        jsp.setBounds(5, 5, 790, 200);
+        jsp.setBounds(5, 5, 790, 400);
         jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         jsp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         questionPanel.add(jsp);
-        JButton answer = new JButton("Задать вопрос");
-        answer.setBounds(5, 207, 150, 25);
-        answer.addActionListener(new ActionListener() {
+        askButton = new JButton("Задать вопрос");
+        askButton.setBounds(5, 407, 150, 25);
+        askButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                lock();
                 WatNetwork.sendMessage(questionPane.getText());
                 questionPane.setText("");
+                unlock();
             }
         });
-        questionPanel.add(answer);
+        questionPanel.add(askButton);
         jTabbedPane.addTab("Задать вопрос", questionPanel);
         add(jTabbedPane);
         lock();

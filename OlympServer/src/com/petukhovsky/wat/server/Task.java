@@ -106,7 +106,6 @@ public class Task {
                 msg += r.getInfo();
                 Gui.getGui().setTestText(msg + "</table>");
             }
-        source.setMsg(msg + "</table>");
         source.setStatus(2);
         source.setScore(score);
     }

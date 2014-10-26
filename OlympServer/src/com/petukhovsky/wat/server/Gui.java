@@ -91,12 +91,14 @@ public class Gui extends JFrame {
         JButton answerToAll = new JButton("Отправить всем");
         answerToAll.setBounds(110, 257, 150, 25);
         olympChooser = new JComboBox<String>();
-        olympChooser.setBounds(263, 257, 150, 25);
+        olympChooser.setBounds(263, 257, 200, 25);
         answerToAll.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int i = msgList.getSelectedIndex();
-                WatOlympiad.messageReceived(-1, olympChooser.getSelectedIndex(), msgPane.getText());
+                int olymp = olympChooser.getSelectedIndex();
+                Olympiad o = WatOlympiad.getOlympiad(olymp);
+                WatOlympiad.messageReceived(-1, olympChooser.getSelectedIndex(), Olympiad.formatTime(o.getTimeFromStart()) + " \n" + msgPane.getText());
             }
         });
         messagesPane.add(olympChooser);

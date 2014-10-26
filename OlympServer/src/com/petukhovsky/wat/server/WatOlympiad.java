@@ -64,6 +64,8 @@ public class WatOlympiad implements Runnable{
         }
         if (b == 1) {
             String msg = ws.read();
+            Olympiad o = olympiads.get(state - 1);
+            msg = Olympiad.formatTime(o.getTimeFromStart()) + " \n*___*\n \n" + msg;
             messageReceived(account.getId(), state - 1, msg);
         }
         if (b == 2) {
@@ -217,6 +219,10 @@ public class WatOlympiad implements Runnable{
             if (i.getId().equals(id)) return i;
         }
         return null;
+    }
+
+    public static Olympiad getOlympiad(int index) {
+        return olympiads.get(index);
     }
 
     public static void answerQuestion(int id, String text) {
