@@ -46,12 +46,22 @@ public class WatOlympiad implements Runnable{
         if (state == 0) {
             if (b == 1) {
                 int i = ws.readInt();
-                if (i >= olympiads.size() || i < 0) ws.writeByte(0);
-                else {
-                    ws.writeByte(1);
-                    sendInfo(ws, olympiads.get(i), account);
-                    states.put(ws, i + 1);
+                if (i >= olympiads.size() || i < 0) {
+                    ws.writeByte(0);
+                    return;
                 }
+                int type = SQLite.getType(olympiads.get(i).getId(), account.getId());
+                if (type == 1) {
+                    ws.writeByte(0);
+                    return;
+                }
+                if (type == 2) {
+                    ws.writeByte(2);
+                } else {
+                    ws.writeByte(1);
+                }
+                sendInfo(ws, olympiads.get(i), account);
+                states.put(ws, i + 1);
             }
             return;
         }

@@ -322,7 +322,7 @@ public class SQLite {
             statement.setQueryTimeout(30);
 
             statement.execute(String.format("UPDATE messages SET msg = '%s' WHERE id = %d", text, id));
-            ResultSet r = statement.executeQuery(String.format("SELECT account, olymp FROM messages WHERE id = '%d'", id));
+            ResultSet r = statement.executeQuery(String.format("SELECT account, olymp FROM messages WHERE id = %d", id));
             while (r.next()) {
                 return new Pair<Integer, String>(r.getInt("account"), r.getString("olymp"));
             }
@@ -337,5 +337,32 @@ public class SQLite {
         }
         Log.d("answerQuestion fail SQLite");
         return null;
+    }
+
+    public static int getType(String olymp, int account) {
+        Connection connection = null;
+        try{
+            connection = DriverManager.getConnection("jdbc:sqlite:" + Checker.RES_DIR + "watserver.db");
+            Statement statement = connection.createStatement();
+            statement.setQueryTimeout(30);
+
+            ResultSet r = statement.executeQuery(String.format("SELECT type FROM olymp_access WHERE account = %d AND olymp = '%s'", account, olymp));
+            while (r.next()) {
+                return r.getInt("type");
+            }
+            r = statement.executeQuery(String.format("SELECT type FROM olymp_access WHERE account = -1 AND olymp = '%s'", olymp));
+            while (r.next()) {
+                return r.getInt("type");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
     }
 }

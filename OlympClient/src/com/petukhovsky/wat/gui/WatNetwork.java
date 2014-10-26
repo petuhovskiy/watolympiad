@@ -196,6 +196,9 @@ public class WatNetwork implements Runnable {
                     JOptionPane.showMessageDialog(WatGUI.getGui(), "Вы не зарегистрированы на соревнование", "WatOlympiad", JOptionPane.WARNING_MESSAGE);
                     WatOlympiad.getWatOlympiad().unlock();
                 } else {
+                    if (b == 2) {
+                        JOptionPane.showMessageDialog(WatGUI.getGui(), "Вы участвуете в соревновании вне конкурса", "WatOlympiad", JOptionPane.WARNING_MESSAGE);
+                    }
                     int count = readInt();
                     String[] arr = new String[count];
                     for (int i = 0; i < count; i++) arr[i] = read();
