@@ -204,7 +204,9 @@ public class Olympiad {
         for (int i = 0; i < problems.size(); i++) msg += "<th>" + ((char)('A' + i)) + "</th>";
         msg += "<th>=</th></tr>";
         for (int i = 0; i < s.size(); i++) {
-            msg += "<tr><td>" + (i + 1) + "</td><td>" + s.get(i).getKey().getColoredUsername() + "</td>";
+            msg += "<tr><td>" + (i + 1) + "</td><td>" + s.get(i).getKey().getColoredUsername();
+            if (SQLite.getType(id, s.get(i).getKey().getId()) == 2) msg += "*";
+            msg += "</td>";
             for (int t = 0; t < problems.size(); t++) {
                 msg += "<td>" + s.get(i).getValue().getScore(t) + "</td>";
             }
