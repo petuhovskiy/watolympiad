@@ -300,6 +300,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
         }
         messages.add(new Pair<Integer, String>(id, msg));
         msgModel.addElement(msg);
+        JOptionPane.showMessageDialog(WatGUI.getGui(), "Получено новое сообщение", "WatOlympiad", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void stopTimer() {

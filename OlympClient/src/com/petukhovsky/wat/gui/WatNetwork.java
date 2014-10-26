@@ -182,9 +182,9 @@ public class WatNetwork implements Runnable {
                 WatAuth.getWatAuth().unlock();
             } else {
                 if (connection == 1) {
-                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Неправильный логин или пароль", "WatGUI", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Неправильный логин или пароль", "WatOlympiad", JOptionPane.WARNING_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Пароль не может состоять из символов пробела и :\\/` &^-=+)(*{}[]", "WatGUI", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Пароль не может состоять из символов пробела и :\\/` &^-=+)(*{}[]", "WatOlympiad", JOptionPane.WARNING_MESSAGE);
                 }
                 destroy();
             }
@@ -193,7 +193,7 @@ public class WatNetwork implements Runnable {
         switch (connection) {
             case 3:
                 if (b == 0) {
-                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Вы не зарегистрированы на соревнование", "WatGUI", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(WatGUI.getGui(), "Вы не зарегистрированы на соревнование", "WatOlympiad", JOptionPane.WARNING_MESSAGE);
                     WatOlympiad.getWatOlympiad().unlock();
                 } else {
                     int count = readInt();
