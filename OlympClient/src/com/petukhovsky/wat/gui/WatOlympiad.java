@@ -45,6 +45,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
     private JList<String> msgList;
     private ArrayList<Pair<Integer, String>> messages;
     private JButton askButton;
+    private int skipMessages = 0;
 
     public WatOlympiad() {
         DefaultSyntaxKit.initKit();
@@ -263,6 +264,7 @@ public class WatOlympiad extends JPanel implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 lock();
+                skipMessages++;
                 WatNetwork.sendMessage(questionPane.getText());
                 questionPane.setText("");
                 unlock();
@@ -288,6 +290,8 @@ public class WatOlympiad extends JPanel implements ActionListener {
     }
 
     public void messageUpdate(int id, String msg) {
+        if (skipMessages > 0) skipMessages--;
+        else JOptionPane.showMessageDialog(WatGUI.getGui(), "Получено новое сообщение", "WatOlympiad", JOptionPane.INFORMATION_MESSAGE);
         for (int i = 0; i < messages.size(); i++) {
             if (messages.get(i).getKey() == id) {
                 messages.set(i, new Pair<Integer, String>(id, msg));
@@ -300,7 +304,6 @@ public class WatOlympiad extends JPanel implements ActionListener {
         }
         messages.add(new Pair<Integer, String>(id, msg));
         msgModel.addElement(msg);
-        JOptionPane.showMessageDialog(WatGUI.getGui(), "Получено новое сообщение", "WatOlympiad", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void stopTimer() {
