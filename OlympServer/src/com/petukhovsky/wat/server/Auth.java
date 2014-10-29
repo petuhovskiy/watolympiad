@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class Auth {
 
-    private static final String BANNED_PASSWORD_CHARACTERS = ":\\/` &^-=+)(*{}[] ";
+    private static final String BANNED_PASSWORD_CHARACTERS = ":\\/` &^-=+)(*{}[] '";
     private static final int MINIMAL_PASSWORD_LENGTH = 4;
 
     private static HashMap<String, Account> accounts = new HashMap<String, Account>();
@@ -49,6 +49,9 @@ public class Auth {
 
     public static Account register(String login, String password, String fName, String sName) {
         if (!checkPass(password)) return null;
+        if (!checkPass(login)) return null;
+        if (!checkPass(fName)) return null;
+        if (!checkPass(sName)) return null;
         if (accounts.containsKey(login.toLowerCase())) return null;
         Account account = Account.create(accounts.size(), login, sha256(password), 0, 0, "black", fName, sName);
         accounts.put(login.toLowerCase(), account);

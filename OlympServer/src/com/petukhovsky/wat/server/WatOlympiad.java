@@ -74,6 +74,7 @@ public class WatOlympiad implements Runnable{
         }
         if (b == 1) {
             String msg = ws.read();
+            if (msg.contains("\"")) return;
             Olympiad o = olympiads.get(state - 1);
             msg = Olympiad.formatTime(o.getTimeFromStart()) + " \n*___*\n \n" + msg;
             messageReceived(account.getId(), state - 1, msg);

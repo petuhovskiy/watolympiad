@@ -250,7 +250,7 @@ public class SQLite {
             statement.setQueryTimeout(30);
 
             statement.execute(String.format("INSERT INTO messages (account, msg, olymp) " +
-                            "VALUES (%d, '%s', '%s')", account, msg, olymp));
+                            "VALUES (%d, \"%s\", '%s')", account, msg, olymp));
             ResultSet r = statement.executeQuery("SELECT MAX(id) FROM messages");
             while (r.next()) {
                 return r.getInt("MAX(id)");
@@ -321,7 +321,7 @@ public class SQLite {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);
 
-            statement.execute(String.format("UPDATE messages SET msg = '%s' WHERE id = %d", text, id));
+            statement.execute(String.format("UPDATE messages SET msg = \"%s\" WHERE id = %d", text, id));
             ResultSet r = statement.executeQuery(String.format("SELECT account, olymp FROM messages WHERE id = %d", id));
             while (r.next()) {
                 return new Pair<Integer, String>(r.getInt("account"), r.getString("olymp"));

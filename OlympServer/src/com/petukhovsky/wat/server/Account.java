@@ -87,4 +87,8 @@ public class Account {
     public String getSecondName() {
         return sName;
     }
+
+    public String getFullName() {
+        return fName + " " + sName;
+    }
 }
