@@ -3,7 +3,6 @@ package com.petukhovsky.wat.server;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -132,8 +131,8 @@ public class Olympiad {
         }, time);
     }
 
-    public Source writeSourceFile(WatSocket ws, int fileLength, int type, int task, Account account) {
-        Source source = addSource(type, task, account);
+    public Source writeSourceFile(WatSocket ws, int fileLength, int type, int task, final Account account) {
+        final Source source = addSource(type, task, account);
         File file = source.getFile();
         OutputStream writer = null;
         try {
@@ -150,7 +149,13 @@ public class Olympiad {
                 e.printStackTrace();
             }
         }
-        WatOlympiad.sendStateWithoutConnection(this, account, source);
+        final Olympiad olymp = this;
+        new Thread(){
+            @Override
+            public void run() {
+                WatOlympiad.sendSourceState(olymp, account, source);
+            }
+        }.start();
         return source;
     }
 
@@ -172,7 +177,7 @@ public class Olympiad {
         return String.format("%02d:%02d:%02d", s/3600, (s%3600)/60, (s%60));
     }
 
-    public void sendStates(WatSocket ws, Account account) {
+    public void sendStates(WatSocket ws, Account account) throws IOException{
         ArrayList<Source> list = SQLite.getSources(account.getId(), id);
         ws.writeInt(list.size());
         for (Source s : list) WatOlympiad.sendState(ws, s);
@@ -183,7 +188,7 @@ public class Olympiad {
         task.checkSolve(source);
         if (source.getStatus() == 2) setResult(source.getAccount(), source.getTask(), source.getScore());
         SQLite.updateSource(source);
-        WatOlympiad.updateStateWithoutConnection(source);
+        WatOlympiad.updateSourceState(source);
     }
 
     private void setResult(Account account, int task, int score) {

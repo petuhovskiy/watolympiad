@@ -171,7 +171,6 @@ public class WatNetwork implements Runnable {
         if (connection == 1 || connection == 2) {
             if (b == 1) {
                 connection = 3;
-                readByte();
                 int count = readInt();
                 String[] arr = new String[count];
                 for (int i = 0; i < count; i++) {

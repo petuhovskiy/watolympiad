@@ -98,7 +98,7 @@ public class Gui extends JFrame {
                 int i = msgList.getSelectedIndex();
                 int olymp = olympChooser.getSelectedIndex();
                 Olympiad o = WatOlympiad.getOlympiad(olymp);
-                WatOlympiad.messageReceived(-1, olympChooser.getSelectedIndex(), Olympiad.formatTime(o.getTimeFromStart()) + " \n" + msgPane.getText());
+                WatOlympiad.userMessageReceived(-1, WatOlympiad.getOlympiad(olympChooser.getSelectedIndex()), Olympiad.formatTime(o.getTimeFromStart()) + " \n" + msgPane.getText());
             }
         });
         messagesPane.add(olympChooser);
